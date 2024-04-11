@@ -47,10 +47,6 @@ public class GameRoom extends Room {
                 sp.sendReadyState(p.getClientId(), p.isReady());
                 sp.sendPlayerTurnStatus(p.getClientId(), p.didTakeTurn());
             });
-            if (currentPlayer != null) {
-                sp.sendCurrentPlayerTurn(currentPlayer.getClientId());
-            }
-
         }
     }
 
@@ -169,32 +165,12 @@ public class GameRoom extends Room {
         canEndSession = false;
         changePhase(Phase.TURN);
         numActivePlayers = players.values().stream().filter(ServerPlayer::isReady).count();
-        setupTurns();
         startTurnTimer();
     }
 
-    private void setupTurns() {
-        turnOrder = players.values().stream().filter(ServerPlayer::isReady).map(p -> p.getClientId())
-                .collect(Collectors.toList());
-        Collections.shuffle(turnOrder);
-        Long currentPlayerId = turnOrder.get(0);
-        currentPlayer = players.get(currentPlayerId);
-        System.out.println(TextFX.colorize("First person is " + currentPlayer.getClientName(), Color.YELLOW));
-        sendCurrentPlayerTurn();
-    }
+  
 
-    private void nextTurn() {
-
-        int index = currentPlayer == null ? 0 : turnOrder.indexOf(currentPlayer.getClientId());
-        System.out.println(TextFX.colorize("Current turn index is " + index, Color.YELLOW));
-        index++;
-        if (index >= turnOrder.size()) {
-            index = 0;
-        }
-        currentPlayer = players.get(turnOrder.get(index));
-        System.out.println(TextFX.colorize("Next person is " + currentPlayer.getClientName(), Color.YELLOW));
-        sendCurrentPlayerTurn();
-    }
+    
 
     private void startTurnTimer() {
         if (turnTimer != null) {
@@ -235,7 +211,7 @@ public class GameRoom extends Room {
         }
         System.out.println(TextFX.colorize("Handling end of turn", Color.YELLOW));
         // option 1 - if they can only do a turn when ready
-        List<ServerPlayer> playersToProcess = players.values().stream().filter(ServerPlayer::didTakeTurn).toList();
+        List<ServerPlayer> playersToProcess = players.values().stream().filter(player -> player.didTakeTurn() && player.getChoice() != null).toList();
         // option 2 - double check they are ready and took a turn
         // List<ServerPlayer> playersToProcess =
         // players.values().stream().filter(sp->sp.isReady() &&
@@ -257,7 +233,6 @@ public class GameRoom extends Room {
         } else {
             resetTurns();
             //implementation 2
-            nextTurn(); 
             //end of implementation 2
             startTurnTimer(); 
         }
@@ -289,13 +264,7 @@ public class GameRoom extends Room {
     }
 
     // start send/sync methods
-    private void sendCurrentPlayerTurn() {
-        Iterator<ServerPlayer> iter = players.values().iterator();
-        while (iter.hasNext()) {
-            ServerPlayer sp = iter.next();
-            sp.sendCurrentPlayerTurn(currentPlayer == null ? Constants.DEFAULT_CLIENT_ID : currentPlayer.getClientId());
-        }
-    }
+
 
 
     private void sendResetLocalReadyState() {

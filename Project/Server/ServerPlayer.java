@@ -7,7 +7,6 @@ import Project.Common.TextFX;
 import Project.Common.TextFX.Color;
 
 public class ServerPlayer extends Player {
-    public static final String getChoice = null;
 	private ServerThread client;
 
     public ServerPlayer(ServerThread t) {
