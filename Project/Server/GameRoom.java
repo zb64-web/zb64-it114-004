@@ -20,6 +20,9 @@ public class GameRoom extends Room {
 
     private TimedEvent readyCheckTimer = null;
     private TimedEvent turnTimer = null;
+private TimedEvent playerDecisionTimer = null;
+    private TimedEvent decisionCheckTimer = null;
+    //zb64 4/3/24
     private Phase currentPhase = Phase.READY;
     private long numActivePlayers = 0;
     private boolean canEndSession = false;
@@ -47,6 +50,10 @@ public class GameRoom extends Room {
                 sp.sendReadyState(p.getClientId(), p.isReady());
                 sp.sendPlayerTurnStatus(p.getClientId(), p.didTakeTurn());
             });
+            if (currentPlayer != null) {
+                sp.sendCurrentPlayerTurn(currentPlayer.getClientId());
+            }
+
         }
     }
 
@@ -70,9 +77,7 @@ public class GameRoom extends Room {
         }
         long playerId = client.getClientId();
         if (players.containsKey(playerId)) {
-            // players.get(playerId).setReady(!players.get(playerId).isReady()); //<--
-            // toggles ready state
-            players.get(playerId).setReady(true);// <-- simply sets the ready state to true
+            players.get(playerId).setReady(true);
             syncReadyState(players.get(playerId));
             System.out.println(TextFX.colorize(players.get(playerId).getClientName() + " marked themselves as ready ",
                     Color.YELLOW));
@@ -87,8 +92,6 @@ public class GameRoom extends Room {
             client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You can't do turns just yet");
             return;
         }
-
-
         // implementation 1
         long clientId = client.getClientId();
         if (players.containsKey(clientId)) {
@@ -111,9 +114,6 @@ public class GameRoom extends Room {
             else {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Your Turn has already been Completed Please Wait");
             }
-
-
-            
         }
 
     }
@@ -124,9 +124,7 @@ public class GameRoom extends Room {
 
         if (readyCheckTimer == null) {
             readyCheckTimer = new TimedEvent(30, () -> {
-                long numReady = players.values().stream().filter(p -> {
-                    return p.isReady();
-                }).count();
+                long numReady = players.values().stream().filter(ServerPlayer::isReady).count();
                 // condition 1: start if we have the minimum ready
                 boolean meetsMinimum = numReady >= Constants.MINIMUM_REQUIRED_TO_START;
                 // condition 2: start if everyone is ready
@@ -145,9 +143,84 @@ public class GameRoom extends Room {
                 }
                 readyCheckTimer.cancel();
                 readyCheckTimer = null;
+readyDecision();
             });
             readyCheckTimer.setTickCallback((time) -> System.out.println("Ready Countdown: " + time));
         }
+    }
+
+    private synchronized void readyDecision() {
+        if (decisionCheckTimer == null) {
+            decisionCheckTimer = new TimedEvent(15, () -> {
+                decisionCheckTimer.cancel();
+                decisionCheckTimer = null;
+            });
+            decisionCheckTimer.setTickCallback((time) -> System.out.println("Player Decision Countdown " + time));
+        }
+    }
+    //zb64 4/3/24
+
+    private void handleEndOfDecisionTime() {
+        if (currentPlayer != null) {
+            playerDecisionTimer.cancel();
+            playerDecisionTimer = null;
+        }
+        boolean allPlayersDecided = players.values().stream().allMatch(ServerPlayer::didTakeTurn);
+        if (allPlayersDecided) {
+            handleEndOfTurn();
+            nextTurn();
+            startPlayerDecisionTimer();
+            readyDecision();
+        } else {
+            System.out.println("Not all players have made their deision yet.");
+        }
+    }
+    //zb64 4/3/24
+
+    private void check() {
+        int remainingPlayers = (int) players.values().stream().filter(p -> !p.didTakeTurn()).count();
+        if (remainingPlayers == 0) {
+            System.out.println("It's a tie!");
+            resetTurns();
+            return;
+        } else if (remainingPlayers == 1) {
+            System.out.println("You won!");
+            end();
+            return;
+        } else {
+            List<String> choice = players.values().stream().filter(p -> p.didTakeTurn()).map(p -> p.getChoice).collect(Collectors.toList());
+            boolean hasDuplicates = choices.stream().distinct().count() < choices.size();
+
+            if(hasDuplicates) {
+                System.out.println("Eliminating players with duplicate choices");
+            }
+            players.values().stream().filter(p -> !p.didTakeTurn()).forEach(p -> p.setChoice(null));
+            startChoicePhase();
+        }
+        int rand = (int)(Math.random() * 3);
+        String playerMove = "";
+        if (rand == 0) {
+            playerMove = "rock";
+        } else if (rand == 1) {
+            playerMove = "paper";
+        } else {
+            playerMove = "scissors";
+        }
+        if (player.equals(playerMove)) {
+            System.out.println("You tied!");
+        } else if ((player.equals("rock") && playerMove.equals("scissors")) || 
+                   (player.equals("scissors") && playerMove.equals("paper")) || 
+                   (player.equals("paper") && playerMove.equals("rock"))) {
+            System.out.println("You won!");
+        } else {
+            System.out.println("You lost!");
+        }
+    }
+    //zb64 4/9/24
+
+    private void startChoicePhase() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'startChoicePhase'");
     }
 
     private void changePhase(Phase incomingChange) {
@@ -165,12 +238,42 @@ public class GameRoom extends Room {
         canEndSession = false;
         changePhase(Phase.TURN);
         numActivePlayers = players.values().stream().filter(ServerPlayer::isReady).count();
+setupTurns();
         startTurnTimer();
+    startPlayerDecisionTimer();
     }
 
-  
+    private void startPlayerDecisionTimer() {
+        if (playerDecisionTimer != null) {
+            playerDecisionTimer.cancel();
+            playerDecisionTimer = null;
+        }
+        if (playerDecisionTimer == null) {
+            playerDecisionTimer = new TimedEvent(15, this::handleEndOfDecisionTime);
+            playerDecisionTimer.setTickCallback(this::checkEarlyEndTurn);
+            sendMessage(ServerConstants.FROM_ROOM, "Make a decision");
+        }
+    }
+    //zb64 4/3/24
 
-    
+    //private void makeChoices() {
+        //int c [] = {};
+        //for (int i = 0; i < c.length; i++) {
+       // }
+    //}
+    //zb64 4/8/24
+
+    static void recordPlayerChoice(ServerThread player, String choice) {
+        long playerId = player.getClientId();
+        if (players.containsKey(playerId)) {
+            ServerPlayer sp = players.get(playerId);
+            sp.setChoice(choice);
+            player.sendMessage(Constants.DEFAULT_CLIENT_ID, "Your choice " + choice + " has been recorded.");
+            System.out.println(TextFX.colorize("Player " + player.getClientName() + " recorded choice: " + choice, Color.PURPLE));
+        }
+    }
+    //zb64 4/8/24
+
 
     private void startTurnTimer() {
         if (turnTimer != null) {
