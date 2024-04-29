@@ -222,9 +222,10 @@ public enum Server {
         }
     }
 
-    boolean processCommand(String message) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processCommand'");
+    private boolean processCommand(String message) {
+        logger.info("Checking command: " + message);
+        // TODO
+        return false;
     }
 
     public static void main(String[] args) {

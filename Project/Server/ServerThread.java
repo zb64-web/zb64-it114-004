@@ -12,6 +12,7 @@ import Project.Common.Constants;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
 import Project.Common.ReadyPayload;
+import Project.Common.RemovingPlayerPayload;
 import Project.Common.RoomResultsPayload;
 import Project.Common.TextFX;
 import Project.Common.TurnStatusPayload;
@@ -125,6 +126,7 @@ public class ServerThread extends Thread {
         p.setMessage(phase);
         return send(p);
     }
+
     protected boolean sendClientMapping(long id, String name) {
         ConnectionPayload cp = new ConnectionPayload();
         cp.setPayloadType(PayloadType.SYNC_CLIENT);
@@ -174,8 +176,16 @@ public class ServerThread extends Thread {
         return send(p);
     }
     //zb64 it114-004 4/3/24
-    
-    /**
+
+    public boolean sendRemoved(boolean isRemoved, long clientId) {
+        RemovingPlayerPayload r = new RemovingPlayerPayload();
+        r.setPayloadType(PayloadType.REMOVED);
+        r.setRemoved(isRemoved);
+        r.setClientId(clientId);
+        return send(r);
+    }
+
+/**
      * Used to associate client names and their ids from the server perspective
      * 
      * @param whoId       id of who is connecting/disconnecting
@@ -220,13 +230,10 @@ public class ServerThread extends Thread {
             isRunning = true;
             Payload fromClient;
             while (isRunning && // flag to let us easily control the loop
-                    (fromClient = (Payload) in.readObject()) != null // reads an object from inputStream (null would
-                                                                     // likely mean a disconnect)
+            (fromClient = (Payload) in.readObject()) != null // reads an object from inputStream (null would // likely mean a disconnect)
             ) {
-
                 info("Received from client: " + fromClient);
                 processPayload(fromClient);
-
             } // close while loop
         } catch (Exception e) {
             // happens when client disconnects
@@ -241,7 +248,7 @@ public class ServerThread extends Thread {
 
     /**
      * Used to process payloads from the client and handle their data
-     * 
+     *
      * @param p
      */
     private void processPayload(Payload p) {
@@ -275,7 +282,8 @@ public class ServerThread extends Thread {
                 Room.joinRoom(p.getMessage(), this);
                 break;
             case LIST_ROOMS:
-                String searchString = p.getMessage() == null ? "" : p.getMessage();
+                String searchString = p.getMessage() == null ? "" :
+                p.getMessage();
                 int limit = 10;
                 try {
                     RoomResultsPayload rp = ((RoomResultsPayload) p);
@@ -292,7 +300,7 @@ public class ServerThread extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                     this.sendMessage(Constants.DEFAULT_CLIENT_ID,
-                            "You can only use the /ready commmand in a GameRoom and not the Lobby");
+                            "You can only use the /ready command in a GameRoom and not the Lobby");
                 }
                 break;
             case TURN:
@@ -301,7 +309,7 @@ public class ServerThread extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                     this.sendMessage(Constants.DEFAULT_CLIENT_ID,
-                            "You can only use the /turn commmand in a GameRoom and not the Lobby");
+                            "You can only use the /turn command in a GameRoom and not the Lobby");
                 }
                 break;
             case CHOICE:
@@ -311,11 +319,19 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                     this.sendMessage(Constants.DEFAULT_CLIENT_ID, "Error processing choice in GameRoom");
                 }
+                break;
+            case REMOVED:
+                try {
+                    ((GameRoom) currentRoom).doTurn(this, p.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    this.sendMessage(Constants.DEFAULT_CLIENT_ID, "Error in removing player in round");
+                }
+                break;
+            //zb64 4/18/24
             default:
                 break;
-
         }
-
     }
 
     private void cleanup() {

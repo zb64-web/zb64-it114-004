@@ -16,6 +16,7 @@ import Project.Common.Payload;
 import Project.Common.PayloadType;
 import Project.Common.Phase;
 import Project.Common.ReadyPayload;
+import Project.Common.RemovingPlayerPayload;
 import Project.Common.RoomResultsPayload;
 import Project.Common.TextFX;
 import Project.Common.TurnStatusPayload;
@@ -41,9 +42,10 @@ public enum Client {
     private static final String DISCONNECT = "/disconnect";
     private static final String READY_CHECK = "/ready";
     private static final String SIMULATE_TURN = "/turn";
-    private static final String ROCK = "/rock";
-    private static final String PAPER = "/paper";
-    private static final String SCISSORS = "/scissors";
+    private static final String ROCK = "/R";
+    private static final String PAPER = "/P";
+    private static final String SCISSORS = "/S";
+    private static final String SKIP = "/skip";
 
 
     // client id, is the key, client name is the value
@@ -213,25 +215,31 @@ public enum Client {
             return true;
         } else if (text.equalsIgnoreCase(ROCK)) {
             try {
-                sendTakeTurn("rock");
+                sendTakeTurn("R");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return true;
         } else if (text.equalsIgnoreCase(PAPER)) {
             try {
-                sendTakeTurn("paper");
+                sendTakeTurn("P");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return true;
         } else if (text.equalsIgnoreCase(SCISSORS)) {
             try {
-                sendTakeTurn("scissors");
+                sendTakeTurn("S");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return true;
+        } else if (text.equalsIgnoreCase(SKIP)) {
+            try {
+                sendTakeTurn("skip");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -484,10 +492,27 @@ public enum Client {
                 break;
             case CHOICE:
                 try {String clientChoice = p.getMessage();
-                System.out.println(TextFX.colorize("Picked"+clientChoice, Color.RED));} 
+                System.out.println(TextFX.colorize("Picked "+clientChoice, Color.RED));} 
                 catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;
+            case REMOVED:
+                try {
+                    RemovingPlayerPayload r = (RemovingPlayerPayload) p;
+                    long removeClientId = r.getClientId();
+                    boolean isRemoved = r.isRemoved();
+                    if (removeClientId == myClientId) {
+                        if (isRemoved) {
+                            System.out.println(TextFX.colorize("You have lost the round so you will be removed.", Color.GREEN));
+                        } else {
+                            System.out.println(TextFX.colorize("You will continue playing.", Color.GREEN));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
             case RESET_TURNS:
                 clientsInRoom.values().stream().forEach(c -> {
                     c.setTakenTurn(false);

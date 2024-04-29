@@ -12,6 +12,7 @@ public class Player {
     }
 
     private String choice;
+    private boolean isRemoved;
 
 
     public String getChoice() {
@@ -22,6 +23,16 @@ public class Player {
         this.choice = choice;
     }
     //zb64 4/10/24
+
+    public boolean getRemoved() {
+        return isRemoved;
+    }
+
+    public void setRemoved(boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
+
+    //zb64 4/18/24
 
     public void setReady(boolean isReady) {
         this.isReady = isReady;
