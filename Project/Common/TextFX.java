@@ -32,14 +32,14 @@ public abstract class TextFX {
      * <br>
      * Note: May not work for all terminals
      * 
-     * @param i  Input text to colorize
+     * @param text  Input text to colorize
      * @param color Enum of Color choice from TextFX.Color
      * @return wrapped String
      */
-    public static String colorize(int i, Color color) {
+    public static String colorize(String text, Color color) {
         StringBuilder builder = new StringBuilder();
         builder.append(color.getCode());
-        builder.append(i);
+        builder.append(text);
         builder.append(RESET);
         return builder.toString();
     }
@@ -50,7 +50,5 @@ public abstract class TextFX {
         System.out.println(TextFX.colorize("This is some blue text.", Color.BLUE));
         System.out.println(TextFX.colorize("And this is green!", Color.GREEN));
     }
-
-    public abstract String colorize(String string, Color blue);
 }
 

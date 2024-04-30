@@ -227,13 +227,9 @@ public class GameRoom extends Room {
             sendMessage(ServerConstants.FROM_ROOM, "At least one player has chosen to skip their turn. Proceeding...");
         }
 
-        //List<ServerPlayer> winner = new ArrayList<>();
         for (int i = 0; i < playersToProcess.size(); i++) {
             ServerPlayer p1 = playersToProcess.get(i);
-            int next = i + 1;
-            if (next >= playersToProcess.size()) {
-                next = 0;
-            }
+            int next = (i + 1) % playersToProcess.size();
             ServerPlayer p2 = playersToProcess.get(next);
             String p1Choice = p1.getChoice();
             String p2Choice = p2.getChoice();
@@ -241,49 +237,32 @@ public class GameRoom extends Room {
             if ((p1Choice.equals("R") && p2Choice.equals("S"))) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-                //winner.add(p1);
                 sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-               // winner.add(p1);
-               sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-               // winner.add(p1);
                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
-            } /*else if (p2Choice.equals("R") && p1Choice.equals("S")) {
-                p1.sendRemoved(hasSkip, i);
-                p1.setRemoved(true);
-                winner.add(p2);
-                sendMessage(ServerConstants.FROM_ROOM, String.format("%s has been removed", p1.getClientName()));
-            } else if (p2Choice.equals("S") && p1Choice.equals("P")) {
-                p1.sendRemoved(hasSkip, i);
-                p1.setRemoved(true);
-                winner.add(p2);
-                sendMessage(ServerConstants.FROM_ROOM, String.format("%s has been removed", p1.getClientName()));
-            } else if  (p2Choice.equals("P") && p1Choice.equals("R")) {
-                p1.sendRemoved(hasSkip, i);
-                p1.setRemoved(true);
-                winner.add(p2);
-                sendMessage(ServerConstants.FROM_ROOM, String.format("%s has been removed", p1.getClientName()));
-            } */
+            }
         }
 
 
         List<ServerPlayer> remainingPlayers = players.values().stream().filter(player -> !player.getRemoved() && player.getChoice() == null).toList();
-        System.out.println(TextFX.colorize(remainingPlayers.size(), Color.YELLOW));        
+        sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(remainingPlayers.size() + " left", Color.YELLOW));
         if (remainingPlayers.size() == 1) {
             ServerPlayer winner = remainingPlayers.get(0);
             sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(winner.getClientName() + " won!", Color.BLUE));
             end();
         } else if (remainingPlayers.size() > 1) {
             sendMessage(ServerConstants.FROM_ROOM, "More than 1 player remains");
-            resetTurns();
+            end();
         } else {
             sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
-            end();
+            resetTurns();
+            start();
         }
 
 
