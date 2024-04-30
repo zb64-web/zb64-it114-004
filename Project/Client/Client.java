@@ -492,11 +492,12 @@ public enum Client {
                 break;
             case CHOICE:
                 try {String clientChoice = p.getMessage();
-                System.out.println(TextFX.colorize("Picked "+clientChoice, Color.RED));} 
+                System.out.println(TextFX.colorize("Picked "+clientChoice, Color.RED));}
                 catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;
+               //zb64 4/16/24
             case REMOVED:
                 try {
                     RemovingPlayerPayload r = (RemovingPlayerPayload) p;
@@ -513,6 +514,7 @@ public enum Client {
                     e.printStackTrace();
                 }
                 break;
+                //zb64 4/18/24
             case RESET_TURNS:
                 clientsInRoom.values().stream().forEach(c -> {
                     c.setTakenTurn(false);

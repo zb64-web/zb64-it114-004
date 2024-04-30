@@ -178,6 +178,15 @@ public class GameRoom extends Room {
             turnTimer = new TimedEvent(15, this::handleEndOfTurn);
             turnTimer.setTickCallback(this::checkEarlyEndTurn);
             sendMessage(ServerConstants.FROM_ROOM, "Pick /R, /P, /S, or /skip for rock paper scissor or to skip turn");
+        } //zb64 4/27/24
+    }
+
+
+    private void checkEarlyEndTurn(int timeRemaining) {
+        long numEnded = players.values().stream().filter(ServerPlayer::didTakeTurn).count();
+        if (numEnded >= numActivePlayers) {
+            // end turn early
+            handleEndOfTurn();
         }
     }
 
@@ -193,18 +202,8 @@ public class GameRoom extends Room {
         currentPlayer = players.get(nextPlayerId);
         currentPlayer.sendCurrentPlayerTurn(nextPlayerId);
         startTurnTimer();
-    }
-//zb64 4/29/24
+    }//zb64 4/29/24
 
-
-
-    private void checkEarlyEndTurn(int timeRemaining) {
-        long numEnded = players.values().stream().filter(ServerPlayer::didTakeTurn).count();
-        if (numEnded >= numActivePlayers) {
-            // end turn early
-            handleEndOfTurn();
-        }
-    }
 
     private void handleEndOfTurn() {
         if (turnTimer != null) {
@@ -226,6 +225,7 @@ public class GameRoom extends Room {
             proceedToNextPlayerTurn();
             sendMessage(ServerConstants.FROM_ROOM, "At least one player has chosen to skip their turn. Proceeding...");
         }
+        //zb64 4/28/24
 
         for (int i = 0; i < playersToProcess.size(); i++) {
             ServerPlayer p1 = playersToProcess.get(i);
@@ -256,9 +256,11 @@ public class GameRoom extends Room {
             ServerPlayer winner = remainingPlayers.get(0);
             sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(winner.getClientName() + " won!", Color.BLUE));
             end();
+            start();
         } else if (remainingPlayers.size() > 1) {
             sendMessage(ServerConstants.FROM_ROOM, "More than 1 player remains");
             end();
+            start();
         } else {
             sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
             resetTurns();
