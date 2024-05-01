@@ -48,6 +48,11 @@ public enum Client {
     private static final String PAPER = "/P";
     private static final String SCISSORS = "/S";
     private static final String SKIP = "/skip";
+    private static final String LIZARD ="/lizard";
+    private static final String SPOCK ="/spock";
+    private static final String FIRE ="/fire";
+
+
 
 
     // client id, is the key, client name is the value
@@ -232,8 +237,31 @@ public enum Client {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-                    }
-    return false;
+            return true;
+        }
+        else if (text.equalsIgnoreCase(LIZARD)) {
+            try {
+                sendTakeTurn("lizard");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else if (text.equalsIgnoreCase(SPOCK)) {
+            try {
+                sendTakeTurn("spock");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else if (text.equalsIgnoreCase(FIRE)) {
+            try {
+                sendTakeTurn("fire");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

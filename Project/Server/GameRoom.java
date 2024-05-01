@@ -1,10 +1,11 @@
 package Project.Server;
 
 import java.util.ArrayList;
-//import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-//import java.util.Random;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 //import java.util.stream.Collectors;
 
@@ -82,40 +83,33 @@ public class GameRoom extends Room {
         }
     }
 
+    private static final List<Moves> move = Arrays.asList(Moves.values());
+
     public synchronized void doTurn(ServerThread client, String choice) {
         if (currentPhase != Phase.TURN) {
             client.sendMessage(Constants.DEFAULT_CLIENT_ID, "You can't do turns just yet");
             return;
         }
-        // implementation 1
         long clientId = client.getClientId();
         if (players.containsKey(clientId)) {
             ServerPlayer sp = players.get(clientId);
-            //they can only participate if they're ready
             if (!sp.isReady()) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have been eliminated or are not ready");
-                return;
-            }
-            if (sp.getPreviousChoice() == choice) {
-                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have already made a choice.");
                 return;
             }
             if (sp.didTakeTurn()) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Your turn has already been completed. Please wait.");
                 return;
             }
-            //zb64 4/8/2024
-            // player can only update their turn "actions once"
             System.out.println(choice);
-            if(!sp.didTakeTurn()) {
+            if (!sp.didTakeTurn()) {
                 sp.setTakenTurn(true);
                 sp.setChoice(choice);
                 sp.sendChoice(choice);
                 sp.setPreviousChoice(choice);
                 sendMessage(ServerConstants.FROM_ROOM, String.format("%s completed their turn ", sp.getClientName()));
                 syncUserTookTurn(sp);
-
-                if(choice.equalsIgnoreCase("skip")) {
+                if (choice.equalsIgnoreCase("skip")) {
                     proceedToNextPlayerTurn();
                 }
             } else {
@@ -123,8 +117,6 @@ public class GameRoom extends Room {
             }
         }
     }
-    // end serverthread interactions
-
 
     private synchronized void readyCheck() {
         if (readyCheckTimer == null) {
@@ -215,22 +207,15 @@ public class GameRoom extends Room {
             turnTimer = null;
         }
         System.out.println(TextFX.colorize("Handling end of turn", Color.YELLOW));
-        // option 1 - if they can only do a turn when ready
-        List<ServerPlayer> playersToProcess = players.values().stream().filter(player -> !player.getRemoved() && player.didTakeTurn() && player.getChoice() != null).toList();        
-        // players.values().stream().filter(sp->sp.isReady() &&
-        // sp.didTakeTurn()).toList();
-        /*playersToProcess.forEach(p -> {
-            sendMessage(ServerConstants.FROM_ROOM, String.format("%s did something for the game", p.getClientName()));
-        });*/
-        // TODO end game logic
-
-        boolean hasSkip = playersToProcess.stream().anyMatch(player -> player.getChoice().equals("skip"));
+    
+        List<ServerPlayer> playersToProcess = players.values().stream()
+        .filter(player -> !player.getRemoved() && player.didTakeTurn() && player.getChoice() != null)
+        .toList();
+        boolean hasSkip = playersToProcess.stream().anyMatch(player -> player.getChoice().equalsIgnoreCase("skip"));
         if (hasSkip) {
             proceedToNextPlayerTurn();
             sendMessage(ServerConstants.FROM_ROOM, "At least one player has chosen to skip their turn. Proceeding...");
         }
-        //zb64 4/28/24
-
         for (int i = 0; i < playersToProcess.size(); i++) {
             ServerPlayer p1 = playersToProcess.get(i);
             int next = (i + 1) % playersToProcess.size();
@@ -238,46 +223,50 @@ public class GameRoom extends Room {
             String p1Choice = p1.getChoice();
             String p2Choice = p2.getChoice();
 
-            if ((p1Choice.equals("R") && p2Choice.equals("S"))) {
-                p2.sendRemoved(hasSkip, i);
-                p2.setRemoved(true);
-                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
-            } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
-                p2.sendRemoved(hasSkip, i);
-                p2.setRemoved(true);
-                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
-            } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
-                p2.sendRemoved(hasSkip, i);
-                p2.setRemoved(true);
-               sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
-            }
-        }
+    if (p1Choice.equals(p2Choice)) {
+        sendMessage(ServerConstants.FROM_ROOM, String.format("%s and %s chose the same move. It's a tie!", p1.getClientName(), p2.getClientName()));
+    } else if ((move.indexOf(p1Choice) + 1) % move.size() == move.indexOf(p2Choice)) {
+        p2.sendRemoved(hasSkip, i);
+        p2.setRemoved(true);
+        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+    } else if (p1Choice.equals("R") && p2Choice.equals("S")) {
+        p2.sendRemoved(hasSkip, i);
+        p2.setRemoved(true);
+        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+    } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
+        p2.sendRemoved(hasSkip, i);
+        p2.setRemoved(true);
+        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+    } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
+        p2.sendRemoved(hasSkip, i);
+        p2.setRemoved(true);
+        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+    }
+}
 
+List<ServerPlayer> remainingPlayers = players.values().stream().filter(player -> !player.getRemoved() && player.getChoice() == null).toList();
+sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(remainingPlayers.size() + " left", Color.YELLOW));
+if (remainingPlayers.size() == 1) {
+    ServerPlayer winner = remainingPlayers.get(0);
+    sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(winner.getClientName() + " won!", Color.BLUE));
+    end();
+    start();
+} else if (remainingPlayers.size() > 1) {
+    sendMessage(ServerConstants.FROM_ROOM, "More than 1 player remains");
+    end();
+    start();
+} else {
+    sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
+    resetTurns();
+    start();
+}
 
-        List<ServerPlayer> remainingPlayers = players.values().stream().filter(player -> !player.getRemoved() && player.getChoice() == null).toList();
-        sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(remainingPlayers.size() + " left", Color.YELLOW));
-        if (remainingPlayers.size() == 1) {
-            ServerPlayer winner = remainingPlayers.get(0);
-            sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(winner.getClientName() + " won!", Color.BLUE));
-            end();
-            start();
-        } else if (remainingPlayers.size() > 1) {
-            sendMessage(ServerConstants.FROM_ROOM, "More than 1 player remains");
-            end();
-            start();
-        } else {
-            sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
-            resetTurns();
-            start();
-        }
-        //zb64 4/29/24
+players.values().forEach(player -> {
+    player.setRemoved(false);
+    player.setReady(false);
+    resetTurns();
+});
 
-
-        players.values().forEach(player -> {
-            player.setRemoved(false);
-            player.setReady(false);
-            resetTurns();
-        });
     } //zb64 4/7/24
 
     private void resetTurns() {

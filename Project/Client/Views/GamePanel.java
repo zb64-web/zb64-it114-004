@@ -1,8 +1,11 @@
 package Project.Client.Views;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.io.IOException;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -17,6 +20,8 @@ import Project.Common.Phase;
 public class GamePanel extends JPanel implements IGameEvents {
     private JPanel gridPanel;
     private CardLayout cardLayout;
+
+    private final List<String> moves = new ArrayList<>();
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
@@ -62,19 +67,43 @@ public class GamePanel extends JPanel implements IGameEvents {
                 e1.printStackTrace();
             }
         });
-        gridPanel.add(sButton);
+        gridPanel.add(pButton);
         this.add(gridPanel);
-        JButton skipButton = new JButton();
-        skipButton.setText("Skip");
-        skipButton.addActionListener(l -> {
+        JButton lButton = new JButton();
+        lButton.setText("Lizard");
+        lButton.addActionListener(l -> {
             try {
-                Client.INSTANCE.sendTakeTurn("skip");
+                Client.INSTANCE.sendTakeTurn("lizard");
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         });
-        gridPanel.add(skipButton);
+        gridPanel.add(lButton);
+        this.add(gridPanel);
+        JButton spockButton = new JButton();
+        spockButton.setText("Spock");
+        spockButton.addActionListener(l -> {
+            try {
+                Client.INSTANCE.sendTakeTurn("spock");
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+        gridPanel.add(spockButton);
+        this.add(gridPanel);
+        JButton fButton = new JButton();
+        fButton.setText("Fire");
+        fButton.addActionListener(l -> {
+            try {
+                Client.INSTANCE.sendTakeTurn("fire");
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+        gridPanel.add(fButton);
         this.add(gridPanel);
         add("GRID", gridPanel);
         setVisible(false);
@@ -203,5 +232,6 @@ public class GamePanel extends JPanel implements IGameEvents {
             makeGrid(rows, columns);
         }
     } */
+
 
 }

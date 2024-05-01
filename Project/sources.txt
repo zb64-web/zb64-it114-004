@@ -4,6 +4,7 @@
 ./Server/ServerThread.java
 ./Server/ServerPlayer.java
 ./Server/Server.java
+./Server/Moves.java
 ./Common/Phase.java
 ./Common/TimedEvent.java
 ./Common/Payload.java
