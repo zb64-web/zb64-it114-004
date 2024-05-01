@@ -67,7 +67,19 @@ public class GamePanel extends JPanel implements IGameEvents {
                 e1.printStackTrace();
             }
         });
-        gridPanel.add(pButton);
+        gridPanel.add(sButton);
+        this.add(gridPanel);
+        JButton skipButton = new JButton();
+        skipButton.setText("Skio");
+        skipButton.addActionListener(l -> {
+            try {
+                Client.INSTANCE.sendTakeTurn("skip");
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        });
+        gridPanel.add(skipButton);
         this.add(gridPanel);
         JButton lButton = new JButton();
         lButton.setText("Lizard");
