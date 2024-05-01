@@ -237,18 +237,22 @@ public class GameRoom extends Room {
             ServerPlayer p2 = playersToProcess.get(next);
             String p1Choice = p1.getChoice();
             String p2Choice = p2.getChoice();
+            int score = 0; //zb64 5/1/24
 
             if ((p1Choice.equals("R") && p2Choice.equals("S"))) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
+                int score++;
                 sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
+                int score++;
                 sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
+                int score++;
                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             }
         }
@@ -267,10 +271,11 @@ public class GameRoom extends Room {
             start();
         } else {
             sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
-            resetTurns();
+            //resetTurns();
             start();
         }
         //zb64 4/29/24
+
 
 
         players.values().forEach(player -> {

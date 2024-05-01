@@ -15,58 +15,80 @@ public class ServerPlayer extends Player {
     }
 
     public long getClientId() {
-        return client != null ? client.getClientId() : Constants.DEFAULT_CLIENT_ID;
+        if (client == null) {
+            return Constants.DEFAULT_CLIENT_ID;
+        }
+        return client.getClientId();
     }
 
     public String getClientName() {
-        return client != null ? client.getClientName() : "";
+        if (client == null) {
+            return "";
+        }
+        return client.getClientName();
+    }
+
+    public void sendReadyState(long clientId, boolean isReady) {
+        if (client == null) {
+            return;
+        }
+        client.sendReadyState(clientId, isReady);
+    }
+
+    public void sendPlayerTurnStatus(long clientId, boolean didTakeTurn) {
+        if (client == null) {
+            return;
+        }
+        client.sendPlayerTurnStatus(clientId, didTakeTurn);
     }
 
     public void sendPhase(Phase phase) {
         if (client != null) {
-            client.sendPhase(phase.name());
+            return;
         }
-    }
-
-    public void sendReadyState(long clientId, boolean isReady) {
-        if (client != null) {
-            client.sendReadyState(clientId, isReady);
-        }
-    }
-
-    public void sendPlayerTurnStatus(long clientId, boolean didTakeTurn) {
-        if (client != null) {
-            client.sendPlayerTurnStatus(clientId, didTakeTurn);
-        }
+        client.sendPhase(phase.name());
     }
 
     public void sendResetLocalTurns() {
-        if (client != null) {
-            client.sendResetLocalTurns();
+        if (client == null) {
+            return;
         }
+        client.sendResetLocalTurns();
     }
 
     public void sendResetLocalReadyState() {
-        if (client != null) {
-            client.sendResetLocalReadyState();
+        if (client == null) {
+            return;
         }
+        client.sendResetLocalReadyState();
     }
 
     public void sendCurrentPlayerTurn(long clientId) {
-        if (client != null) {
-            client.sendCurrentPlayerTurn(clientId);
+        if (client == null) {
+            return;
         }
+        client.sendCurrentPlayerTurn(clientId);
     }
 
     public void sendChoice(String clientChoice) {
         if (client != null) {
-            client.sendChoice(clientChoice);
+            return;
         }
+        client.sendChoice(clientChoice);
     }
 
     public void sendRemoved(boolean isRemoved, long clientId) {
         if (client != null) {
-            client.sendRemoved(isRemoved, clientId);
+            return;
         }
+        client.sendRemoved(isRemoved, clientId);
     }
+
+    public void sendMessage(long clientId, String message) {
+        if (client == null) {
+            return;
+        }
+        client.sendMessage(clientId, message);
+    }
+
 }
