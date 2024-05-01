@@ -1,7 +1,7 @@
 package Project.Common;
 
 public abstract class TextFX {
-        // For chatroom projects, this does not satisfy the text formatting
+    // For chatroom projects, this does not satisfy the text formatting
     // feature/requirements
     public enum Color {
         BLACK("\033[0;30m"),
@@ -51,4 +51,3 @@ public abstract class TextFX {
         System.out.println(TextFX.colorize("And this is green!", Color.GREEN));
     }
 }
-

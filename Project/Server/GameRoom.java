@@ -1,19 +1,18 @@
 package Project.Server;
 
 import java.util.ArrayList;
-import java.util.Collections;
+//import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
+//import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 
 import Project.Common.Constants;
 import Project.Common.Phase;
 import Project.Common.TextFX;
 import Project.Common.TimedEvent;
 import Project.Common.TextFX.Color;
-import Project.Server.ServerConstants;
 
 public class GameRoom extends Room {
 
@@ -97,6 +96,10 @@ public class GameRoom extends Room {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have been eliminated or are not ready");
                 return;
             }
+            if (sp.getPreviousChoice() == choice) {
+                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have already made a choice.");
+                return;
+            }
             if (sp.didTakeTurn()) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Your turn has already been completed. Please wait.");
                 return;
@@ -108,6 +111,7 @@ public class GameRoom extends Room {
                 sp.setTakenTurn(true);
                 sp.setChoice(choice);
                 sp.sendChoice(choice);
+                sp.setPreviousChoice(choice);
                 sendMessage(ServerConstants.FROM_ROOM, String.format("%s completed their turn ", sp.getClientName()));
                 syncUserTookTurn(sp);
 
@@ -162,8 +166,8 @@ public class GameRoom extends Room {
             System.err.println("Invalid phase called during start()");
             return;
         }
-        canEndSession = false;
         changePhase(Phase.TURN);
+        canEndSession = false;
         numActivePlayers = players.values().stream().filter(player -> player.isReady() == true && player.getRemoved() == false).count();
         startTurnTimer();
     }
@@ -266,6 +270,7 @@ public class GameRoom extends Room {
             resetTurns();
             start();
         }
+        //zb64 4/29/24
 
 
         players.values().forEach(player -> {
