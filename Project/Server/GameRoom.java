@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
 import Project.Common.Constants;
 import Project.Common.Phase;
 import Project.Common.TextFX;
@@ -74,7 +75,7 @@ public class GameRoom extends Room {
         if (players.containsKey(playerId)) {
             players.get(playerId).setReady(true);
             syncReadyState(players.get(playerId));
-            System.out.println(TextFX.colorize(players.get(playerId).getClientName() + " marked themselves as ready ",Color.YELLOW));
+            System.out.println(TextFX.colorize(players.get(playerId).getClientName() + " marked themselves as ready ", Color.YELLOW));
             readyCheck();
         } else {
             System.err.println(TextFX.colorize("Player doesn't exist: " + client.getClientName(), Color.RED));
@@ -95,17 +96,17 @@ public class GameRoom extends Room {
             if (!sp.isReady()) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have been eliminated or are not ready");
                 return;
+}
                 if (sp.getPreviousChoice() != null && sp.getPreviousChoice().equals(choice)) {
                     client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have already made a choice.");
                     return;
                 }
-            }
-            if (sp.didTakeTurn()) {
+                        if (sp.didTakeTurn()) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Your turn has already been completed. Please wait.");
                 return;
             }
 if (!sp.didTakeTurn()) {
-                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you haven't made a choice and will be skipped");
+                client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have been eliminated or are not ready");
                 return;
             }
             //zb64 4/8/2024
@@ -118,7 +119,8 @@ if (!sp.didTakeTurn()) {
                 sp.setPreviousChoice(choice);
                 sendMessage(ServerConstants.FROM_ROOM, String.format("%s completed their turn ", sp.getClientName()));
                 syncUserTookTurn(sp);
-                if (choice.equalsIgnoreCase("skip")) {
+                
+                if(choice.equalsIgnoreCase("skip")) {
                     proceedToNextPlayerTurn();
                 }
             } else {
@@ -126,6 +128,10 @@ if (!sp.didTakeTurn()) {
             }
         }
     }
+// end serverthread interactions
+
+// end serverthread interactions
+
 
     private synchronized void readyCheck() {
         if (readyCheckTimer == null) {
@@ -253,21 +259,44 @@ if (!sp.didTakeTurn()) {
             String p1Choice = p1.getChoice();
             String p2Choice = p2.getChoice();
 
-    if (p1Choice.equals(p2Choice)) {
-        sendMessage(ServerConstants.FROM_ROOM, String.format("%s and %s chose the same move. It's a tie!", p1.getClientName(), p2.getClientName()));
-    } else if (p1Choice.equals("R") && p2Choice.equals("S")) {
+    if ((p1Choice.equals("R") && p2Choice.equals("S"))) {
         p2.sendRemoved(hasSkip, i);
         p2.setRemoved(true);
-        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+        sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
     } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
         p2.sendRemoved(hasSkip, i);
         p2.setRemoved(true);
-        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
+        sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
     } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
         p2.sendRemoved(hasSkip, i);
         p2.setRemoved(true);
-        sendMessage(ServerConstants.FROM_ROOM, String.format("%s has chosen %s and %s has chosen %s and lost", p1.getClientName(), p1Choice, p2.getClientName(), p2Choice));
-    }
+        sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
+            } else if((p1Choice.equals("lizard") && p2Choice.equals("spock"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got poisioned"));
+            } else if((p1Choice.equals("lizard") && p2Choice.equals("P"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got eaten"));
+            } else if((p1Choice.equals("spock") && p2Choice.equals("S"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got smashed"));
+            } else if((p1Choice.equals("spock") && p2Choice.equals("R"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got vaporized"));
+            } else if((p1Choice.equals("R") && p2Choice.equals("lizard"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got smashed"));
+            } else if((p1Choice.equals("R") && p2Choice.equals("S"))) {
+                p2.sendRemoved(hasSkip, i);
+                p2.setRemoved(true);
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and got decapitated"));
+            }
+//zb64 5/1/24
 }
 
 
