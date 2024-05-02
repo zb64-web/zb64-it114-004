@@ -159,4 +159,15 @@ public class GameEventsPanel extends JPanel implements IGameEvents {
         String message = String.format("%s rolled a %s", Client.INSTANCE.getClientNameFromId(clientId), roll);
         addText(message);
     } */
+
+    @Override
+    public void onReceivePoints(long clientId, int changedPoints, int currentPoints) {
+        String message = String.format("%s %s %s points and now has %s",
+                Client.INSTANCE.getClientNameFromId(clientId), changedPoints >= 0 ? "gained" : "lost", changedPoints,
+                currentPoints);
+        addText(message);
+    }
+
+
+    //zb64 5/1/24
 }

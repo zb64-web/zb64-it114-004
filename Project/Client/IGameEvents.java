@@ -32,4 +32,6 @@ public interface IGameEvents extends IClientEvents {
 
     //void onReceiveRoll(long clientId, int roll);
 
+void onReceivePoints(long clientId, int changedPoints, int currentPoints);
+
 }

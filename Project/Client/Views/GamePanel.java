@@ -20,14 +20,14 @@ import Project.Common.Phase;
 public class GamePanel extends JPanel implements IGameEvents {
     private JPanel gridPanel;
     private CardLayout cardLayout;
-
-    private final List<String> moves = new ArrayList<>();
+    private ICardControls controls;
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
         cardLayout = (CardLayout) this.getLayout();
         this.setName(CardView.GAME_SCREEN.name());
         Client.INSTANCE.addCallback(this);
+        this.controls = controls;
 
         createReadyPanel();
         gridPanel = new JPanel();
@@ -70,7 +70,7 @@ public class GamePanel extends JPanel implements IGameEvents {
         gridPanel.add(sButton);
         this.add(gridPanel);
         JButton skipButton = new JButton();
-        skipButton.setText("Skio");
+        skipButton.setText("Skip");
         skipButton.addActionListener(l -> {
             try {
                 Client.INSTANCE.sendTakeTurn("skip");
@@ -105,18 +105,7 @@ public class GamePanel extends JPanel implements IGameEvents {
         });
         gridPanel.add(spockButton);
         this.add(gridPanel);
-        JButton fButton = new JButton();
-        fButton.setText("Fire");
-        fButton.addActionListener(l -> {
-            try {
-                Client.INSTANCE.sendTakeTurn("fire");
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-        });
-        gridPanel.add(fButton);
-        this.add(gridPanel);
+        //zb64 5/1/24
         add("GRID", gridPanel);
         setVisible(false);
         // don't need to add this to ClientUI as this isn't a primary panel(it's nested
@@ -225,6 +214,15 @@ public class GamePanel extends JPanel implements IGameEvents {
     @Override
     public void onReceiveReady(long clientId, boolean isReady){
 
+    }
+
+@Override
+    public void onReceivePoints(long clientId, int changedPoints, int currentPoints) {
+        if (controls != null) {
+            controls.updateClientPoints(clientId, currentPoints);
+        } else {
+            System.err.println("Error: controls object is null. Unable to update client points.");
+        }
     }
 
    /*  @Override

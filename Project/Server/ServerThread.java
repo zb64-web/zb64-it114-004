@@ -11,6 +11,7 @@ import Project.Common.ConnectionPayload;
 import Project.Common.Constants;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
+import Project.Common.PointsPayload;
 import Project.Common.ReadyPayload;
 import Project.Common.RemovingPlayerPayload;
 import Project.Common.RoomResultsPayload;
@@ -84,6 +85,16 @@ public class ServerThread extends Thread {
         info("Thread being disconnected by server");
         isRunning = false;
         cleanup();
+    }
+
+    // send methods
+    protected boolean sendPoints(long clientId, int changedPoints, int currentPoints) {
+        PointsPayload pp = new PointsPayload();
+        pp.setPayloadType(PayloadType.POINTS);
+        pp.setClientId(clientId);
+        pp.setChangedPoints(changedPoints);
+        pp.setCurrentPoints(currentPoints);
+        return send(pp);
     }
 
     // send methods

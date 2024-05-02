@@ -69,4 +69,35 @@ public class ServerPlayer extends Player {
             client.sendRemoved(isRemoved, clientId);
         }
     }
+
+    public void sendPoints(long clientId, int changedPoints, int currentPoints) {
+        if (client == null) {
+            return;
+        }
+        client.sendPoints(clientId, changedPoints, currentPoints);
+    }
+    //zb64 5/1/24
+
+
+    public void setChoice(String choice) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setChoice'");
+    }
+
+
+
+    public boolean getRemoved() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getRemoved'");
+    }
+
+    public String getChoice() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getChoice'");
+    }
+
+    public void setRemoved(boolean b) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setRemoved'");
+    }
 }

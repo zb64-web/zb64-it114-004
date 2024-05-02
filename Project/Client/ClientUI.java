@@ -64,7 +64,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
             }
         });
 
-        setMinimumSize(new Dimension(400, 400));
+        setMinimumSize(new Dimension(500, 500));
         // centers window
         setLocationRelativeTo(null);
         card = new CardLayout();
@@ -228,5 +228,12 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
             chatGamePanel.getChatPanel().addText("Joined room " + roomName);
         }
+    }
+
+    // ICardControl
+    @Override
+    public void updateClientPoints(long clientId, int currentPoints) {
+        System.out.println(String.format("Client %s has %s treasure", clientId, currentPoints));
+        chatGamePanel.getChatPanel().updateClientPoints(clientId, currentPoints);
     }
 }
