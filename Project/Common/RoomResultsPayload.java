@@ -3,7 +3,7 @@ package Project.Common;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoomResultsPayload extends Payload{
+public class RoomResultsPayload extends Payload {
     private List<String> rooms = new ArrayList<String>();
     /**
      * Used to limit the returned result set. Added after video recording.
@@ -30,4 +30,5 @@ public class RoomResultsPayload extends Payload{
         this.rooms = rooms;
     }
 }
+
 

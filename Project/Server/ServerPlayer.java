@@ -69,4 +69,12 @@ public class ServerPlayer extends Player {
             client.sendRemoved(isRemoved, clientId);
         }
     }
+
+    public void sendPoints(long clientId, int changedPoints, int currentPoints) {
+        if (client == null) {
+            return;
+        }
+        client.sendPoints(clientId, changedPoints, currentPoints);
+    }
+    //zb64 5/1/24
 }

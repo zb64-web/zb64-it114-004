@@ -6,33 +6,25 @@ package Project.Common;
 public class Player {
     private boolean isReady;
 
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int changePoints(int points) {
+        this.points += points;
+        return this.points;
+    }
+
+    private int points;
+
 
     public boolean isReady() {
         return isReady;
     }
-
-    private String choice;
-    private boolean isRemoved;
-
-
-    public String getChoice() {
-        return choice;
-    }
-
-    public void setChoice(String choice) {
-        this.choice = choice;
-    }
-    //zb64 4/10/24
-
-    public boolean getRemoved() {
-        return isRemoved;
-    }
-
-    public void setRemoved(boolean isRemoved) {
-        this.isRemoved = isRemoved;
-    }
-
-    //zb64 4/18/24
 
     public void setReady(boolean isReady) {
         this.isReady = isReady;
@@ -58,9 +50,37 @@ public class Player {
         this.isMyTurn = isMyTurn;
     }
 
-    public long getClientId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getClientId'");
+    private String choice;
+    private boolean isRemoved;
+
+
+    public String getChoice() {
+        return choice;
     }
 
+    public void setChoice(String choice) {
+        this.choice = choice;
+    }
+    //zb64 4/10/24
+
+    public boolean getRemoved() {
+        return isRemoved;
+    }
+
+    public void setRemoved(boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
+    //zb64 4/18/24
+
+    String lastChoice;
+
+    public String getPreviousChoice() {
+        return lastChoice;
+    }
+
+    public void setPreviousChoice(String lastChoice) {
+        this.lastChoice = lastChoice;
+    }
 }
+
+
