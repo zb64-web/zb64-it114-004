@@ -58,4 +58,9 @@ public class Payload implements Serializable{
         return String.format("Type[%s], Message[%s], ClientId[%s]", getPayloadType().toString(),
                 getMessage(), getClientId());
     }
+
+    public String getClientName() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getClientName'");
+    }
 }

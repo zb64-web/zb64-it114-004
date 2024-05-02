@@ -1,6 +1,7 @@
 package Project.Common;
 
-public class ConnectionPayload extends Payload{
+public class ConnectionPayload extends Payload {
+
     public ConnectionPayload() {
         setPayloadType(PayloadType.CLIENT_ID);
     }
@@ -27,4 +28,3 @@ public class ConnectionPayload extends Payload{
         return super.toString() + ", Client name " + getClientName();
     }
 }
-

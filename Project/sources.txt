@@ -4,6 +4,7 @@
 ./Server/ServerThread.java
 ./Server/ServerPlayer.java
 ./Server/Server.java
+./Server/Moves.java
 ./Common/Phase.java
 ./Common/TimedEvent.java
 ./Common/Payload.java
@@ -18,3 +19,19 @@
 ./Common/Constants.java
 ./Client/Client.java
 ./Client/ClientPlayer.java
+./Client/IClientEvents.java
+./Client/ClientUtils.java
+./Client/IGameEvents.java
+./Client/ICardControls.java
+./Client/CardView.java
+./Client/ClientUI.java
+./Client/Views/GameEventsPanel.java
+./Client/Views/Menu.java
+./Client/Views/ChatPanel.java
+./Client/Views/UserDetailsPanel.java
+./Client/Views/RoomsPanel.java
+./Client/Views/GamePanel.java
+./Client/Views/ConnectionPanel.java
+./Client/Views/ChatGamePanel.java
+./Client/Views/UserListPanel.java
+./Client/Views/RoomListItem.java
