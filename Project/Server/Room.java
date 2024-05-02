@@ -141,6 +141,7 @@ public class Room implements AutoCloseable {
                     cl.send(finalMessage);
                 }
             }
+            return wasCommand;
         } catch (Exception e) {
             e.printStackTrace();
         }

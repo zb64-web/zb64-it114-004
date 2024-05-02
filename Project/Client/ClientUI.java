@@ -152,6 +152,14 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         // TODO add connecting screen/notice
     }
 
+    // ICardControl
+    @Override
+    public void updateClientPoints(long clientId, int currentPoints) {
+        System.out.println(String.format("Client %s has %s treasure", clientId, currentPoints));
+        chatGamePanel.getChatPanel().updateClientPoints(clientId, currentPoints);
+    }
+
+
     public static void main(String[] args) {
         new ClientUI("Client");
     }

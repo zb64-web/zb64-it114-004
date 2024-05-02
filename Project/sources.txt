@@ -8,6 +8,7 @@
 ./Common/TimedEvent.java
 ./Common/Payload.java
 ./Common/RemovingPlayerPayload.java
+./Common/PointsPayload.java
 ./Common/TurnStatusPayload.java
 ./Common/ConnectionPayload.java
 ./Common/ReadyPayload.java
@@ -25,6 +26,7 @@
 ./Client/CardView.java
 ./Client/ClientUI.java
 ./Client/Views/GameEventsPanel.java
+./Client/Views/UserListItem.java
 ./Client/Views/Menu.java
 ./Client/Views/ChatPanel.java
 ./Client/Views/UserDetailsPanel.java

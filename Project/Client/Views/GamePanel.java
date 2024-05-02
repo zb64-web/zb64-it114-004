@@ -17,12 +17,15 @@ import Project.Common.Phase;
 public class GamePanel extends JPanel implements IGameEvents {
     private JPanel gridPanel;
     private CardLayout cardLayout;
+    private ICardControls controls;
+
 
     public GamePanel(ICardControls controls) {
         super(new CardLayout());
         cardLayout = (CardLayout) this.getLayout();
         this.setName(CardView.GAME_SCREEN.name());
         Client.INSTANCE.addCallback(this);
+        this.controls = controls;
 
         createReadyPanel();
         gridPanel = new JPanel();
@@ -184,6 +187,15 @@ public class GamePanel extends JPanel implements IGameEvents {
     @Override
     public void onReceiveReady(long clientId, boolean isReady){
 
+    }
+
+    @Override
+    public void onReceivePoints(long clientId, int changedPoints, int currentPoints) {
+        if (controls != null) {
+            controls.updateClientPoints(clientId, currentPoints);
+        } else {
+            System.err.println("Error: controls object is null. Unable to update client points.");
+        }
     }
 
    /*  @Override

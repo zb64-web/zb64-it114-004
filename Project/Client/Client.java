@@ -16,6 +16,7 @@ import Project.Common.Constants;
 import Project.Common.Payload;
 import Project.Common.PayloadType;
 import Project.Common.Phase;
+import Project.Common.PointsPayload;
 import Project.Common.ReadyPayload;
 import Project.Common.RemovingPlayerPayload;
 import Project.Common.RoomResultsPayload;
@@ -575,11 +576,28 @@ public enum Client {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                break;//zb64 4/18/24
+            case POINTS:
+                try {
+                    PointsPayload pp = (PointsPayload) p;
+                    if (clientsInRoom.containsKey(pp.getClientId())) {
+                        ClientPlayer cpp = clientsInRoom.get(pp.getClientId());
+                        cpp.setPoints(pp.getCurrentPoints());
+                        events.forEach(e -> {
+                            if (e instanceof IGameEvents) {
+                                ((IGameEvents) e).onReceivePoints(pp.getClientId(), pp.getChangedPoints(),
+                                        pp.getCurrentPoints());
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
-                //zb64 4/18/24
+                //zb64 5/1/24
+            // case END_SESSION: //clearing all local player data
             default:
                 break;
-
         }
     }
 

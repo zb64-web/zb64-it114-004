@@ -1,12 +1,10 @@
 package Project.Server;
 
 import java.util.ArrayList;
-//import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-//import java.util.Random;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-//import java.util.stream.Collectors;
 
 import Project.Common.Constants;
 import Project.Common.Phase;
@@ -75,7 +73,7 @@ public class GameRoom extends Room {
         if (players.containsKey(playerId)) {
             players.get(playerId).setReady(true);
             syncReadyState(players.get(playerId));
-            System.out.println(TextFX.colorize(players.get(playerId).getClientName() + " marked themselves as ready ",Color.YELLOW));
+            System.out.println(TextFX.colorize(players.get(playerId).getClientName() + " marked themselves as ready ", Color.YELLOW));
             readyCheck();
         } else {
             System.err.println(TextFX.colorize("Player doesn't exist: " + client.getClientName(), Color.RED));
@@ -96,7 +94,7 @@ public class GameRoom extends Room {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have been eliminated or are not ready");
                 return;
             }
-            if (sp.getPreviousChoice() == choice) {
+            if (sp.getPreviousChoice() != null && sp.getPreviousChoice().equals(choice)) {
                 client.sendMessage(Constants.DEFAULT_CLIENT_ID, "Sorry, you have already made a choice.");
                 return;
             }
@@ -206,8 +204,7 @@ public class GameRoom extends Room {
         currentPlayer = players.get(nextPlayerId);
         currentPlayer.sendCurrentPlayerTurn(nextPlayerId);
         startTurnTimer();
-    }//zb64 4/29/24
-
+    }
 
     private void handleEndOfTurn() {
         if (turnTimer != null) {
@@ -216,13 +213,14 @@ public class GameRoom extends Room {
         }
         System.out.println(TextFX.colorize("Handling end of turn", Color.YELLOW));
         // option 1 - if they can only do a turn when ready
-        List<ServerPlayer> playersToProcess = players.values().stream().filter(player -> !player.getRemoved() && player.didTakeTurn() && player.getChoice() != null).toList();        
-        // players.values().stream().filter(sp->sp.isReady() &&
-        // sp.didTakeTurn()).toList();
-        /*playersToProcess.forEach(p -> {
-            sendMessage(ServerConstants.FROM_ROOM, String.format("%s did something for the game", p.getClientName()));
-        });*/
-        // TODO end game logic
+        List<ServerPlayer> playersToProcess = players.values().stream().filter(player -> !player.getRemoved() && player.didTakeTurn() && player.getChoice() != null).toList();
+        Random random = new Random();
+        for (ServerPlayer player : playersToProcess) {
+            int scores = random.nextInt(4);
+            int currentPoints = player.changePoints(scores);
+            sendPoints(player.getClientId(), scores, currentPoints);
+            sendMessage(ServerConstants.FROM_ROOM, "Recevied %s points and now has %s", scores, currentPoints, Color.YELLOW);
+        }
 
         boolean hasSkip = playersToProcess.stream().anyMatch(player -> player.getChoice().equals("skip"));
         if (hasSkip) {
@@ -237,23 +235,19 @@ public class GameRoom extends Room {
             ServerPlayer p2 = playersToProcess.get(next);
             String p1Choice = p1.getChoice();
             String p2Choice = p2.getChoice();
-            int score = 0; //zb64 5/1/24
 
             if ((p1Choice.equals("R") && p2Choice.equals("S"))) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-                int score++;
                 sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("S") && p2Choice.equals("P")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-                int score++;
                 sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             } else if (p1Choice.equals("P") && p2Choice.equals("R")) {
                 p2.sendRemoved(hasSkip, i);
                 p2.setRemoved(true);
-                int score++;
-               sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
+                sendMessage(ServerConstants.FROM_ROOM, String.format(p1.getClientName() + " has chosen " + p1Choice + " and " + p2.getClientName() + " has chosen " + p2Choice+ " and lost"));
             }
         }
 
@@ -264,18 +258,17 @@ public class GameRoom extends Room {
             ServerPlayer winner = remainingPlayers.get(0);
             sendMessage(ServerConstants.FROM_ROOM, TextFX.colorize(winner.getClientName() + " won!", Color.BLUE));
             end();
-            start();
+            resetTurns();
         } else if (remainingPlayers.size() > 1) {
             sendMessage(ServerConstants.FROM_ROOM, "More than 1 player remains");
             end();
-            start();
+            resetTurns();
         } else {
             sendMessage(ServerConstants.FROM_ROOM, "It's a tie!");
-            //resetTurns();
+            resetTurns();
             start();
         }
         //zb64 4/29/24
-
 
 
         players.values().forEach(player -> {
@@ -284,6 +277,11 @@ public class GameRoom extends Room {
             resetTurns();
         });
     } //zb64 4/7/24
+
+    private void sendMessage(ServerThread fromRoom, String string, int scores, int currentPoints, Color yellow) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendMessage'");
+    }
 
     private void resetTurns() {
         players.values().stream().forEach(p -> p.setTakenTurn(false));
@@ -310,12 +308,20 @@ public class GameRoom extends Room {
 
     // start send/sync methods
 
+    private void sendPoints(long clientId, int changedPoints, int currentPoints) {
+        Iterator<ServerPlayer> iter = players.values().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer sp = iter.next();
+            sp.sendPoints(clientId, changedPoints, currentPoints);
+        }
+    }
+
     private void sendResetLocalReadyState() {
         Iterator<ServerPlayer> iter = players.values().iterator();
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
             sp.sendResetLocalReadyState();
-}
+        }
     }
 
     private void sendResetLocalTurns() {
@@ -323,7 +329,7 @@ public class GameRoom extends Room {
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
             sp.sendResetLocalTurns();
-}
+        }
     }
 
     private void syncUserTookTurn(ServerPlayer isp) {
@@ -331,14 +337,14 @@ public class GameRoom extends Room {
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
             sp.sendPlayerTurnStatus(isp.getClientId(), isp.didTakeTurn());
+        }
     }
-}
     private void syncCurrentPhase() {
         Iterator<ServerPlayer> iter = players.values().iterator();
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
             sp.sendPhase(currentPhase);
-}
+        }
     }
 
     private void syncReadyState(ServerPlayer csp) {
@@ -346,7 +352,8 @@ public class GameRoom extends Room {
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
             sp.sendReadyState(csp.getClientId(), csp.isReady());
-}
+        }
     }
     // end send/sync methods
 }
+
