@@ -1,5 +1,5 @@
 Video Link:https://www.youtube.com/watch?v=O8xy4g4CSFs 
-(this was the old demo which isn't updated with what I changed in Milestone3
+(this was the old demo which isn't updated with what I changed in Milestone3 because of the errors)
 Name: Zubaidah Bandele
 Project: RPS
 Professor: Toegel
